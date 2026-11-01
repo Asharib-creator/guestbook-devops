@@ -30,14 +30,13 @@ pipeline {
     post {
         always {
             script {
-                def TEST_MODE = false   // set to false only at the very end
-                def subj = "Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"
-                def body = "Job: ${env.JOB_NAME}\nResult: ${currentBuild.currentResult}\nLogs: ${env.BUILD_URL}console"
-                if (TEST_MODE) {
-                    emailext(subject: "[TEST] ${subj}", body: body, to: 'ashy19spawner10@gmail.com')
-                } else {
-                    emailext(subject: subj, body: body, recipientProviders: [developers(), requestor()])
-                }
+                def author = sh(script: 'git log -1 --pretty=format:%ae || true', returnStdout: true).trim()
+                if (!author) { author = 'ashy19spawner10@gmail.com' }
+                emailext(
+                    subject: "Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                    body: "Job: ${env.JOB_NAME}\nResult: ${currentBuild.currentResult}\nPushed by: ${author}\nLogs: ${env.BUILD_URL}console",
+                    to: author
+                )
             }
         }
     }
