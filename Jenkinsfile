@@ -30,7 +30,7 @@ pipeline {
     post {
         always {
             script {
-                def TEST_MODE = true   // set to false only at the very end
+                def TEST_MODE = false   // set to false only at the very end
                 def subj = "Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}"
                 def body = "Job: ${env.JOB_NAME}\nResult: ${currentBuild.currentResult}\nLogs: ${env.BUILD_URL}console"
                 if (TEST_MODE) {
