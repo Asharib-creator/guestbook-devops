@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: guestbook-db-ci
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: guestbook
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - db_data_ci:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    image: python:3.11-slim
+    container_name: guestbook-web-ci
+    working_dir: /app
+    volumes:
+      - /var/lib/jenkins/workspace/guestbook-pipeline:/app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python app.py"
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: db
+      DB_USER: appuser
+      DB_PASS: apppass
+      DB_NAME: guestbook
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data_ci:
